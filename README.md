@@ -55,3 +55,46 @@ Once the above configuration is done, restart jenkins to reflect the change.
 Now, you will be able to access jenkins via https using the below link
 
  https://localhost:8443
+
+
+**To configure the nexus to work with SSL , we will use the same certificate which we created for jenkins:**
+
+We are usig nexus-3 use below link to download and install it:
+
+https://devopscube.com/how-to-install-latest-sonatype-nexus-3-on-linux/
+
+Add below part to **"jetty-https.xm"**
+
+[root@ip-172-31-71-214 jetty]# pwd
+/opt/nexus/etc/jetty
+[root@ip-172-31-71-214 jetty]# ll jetty-https.xml
+-rw-r--r-- 1 ec2-user ec2-user 3619 Apr 24 14:24 jetty-https.xml
+
+    <Set name="KeyStorePath"><Property name="ssl.etc"/>/jenkins.jks</Set>
+    <Set name="KeyStorePassword">tushar123</Set>
+    <Set name="KeyManagerPassword">tushar123</Set>
+    <Set name="TrustStorePath"><Property name="ssl.etc"/>/jenkins.jks</Set>
+    <Set name="TrustStorePassword">tushar123</Set>
+    <Set name="EndpointIdentificationAlgorithm"></Set>
+
+Need to copy keystore from "/var/lib/jenkins/jenkins.jks" to "/opt/nexus/etc/ssl/jenkins.jks"
+
+Now do below changes to /opt/sonatype-work/nexus3/etc/nexus.properties
+
+# cat /opt/sonatype-work/nexus3/etc/nexus.properties
+# Jetty section
+application-port=8081
+application-port-ssl=8444
+application-host=0.0.0.0
+nexus-args=${jetty.etc}/jetty.xml,${jetty.etc}/jetty-http.xml,${jetty.etc}/jetty-https.xml,${jetty.etc}/jetty-requestlog.xml
+nexus-context-path=/
+
+# Nexus section
+nexus-edition=nexus-pro-edition
+nexus-features=\
+nexus-pro-feature
+
+# nexus.hazelcast.discovery.isEnabled=true
+
+
+
